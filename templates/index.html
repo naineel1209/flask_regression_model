@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Price Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../static/styles/style.css">
+</head>
+
+<body class="bg-dark">
+  <div class="p-5 w-[100%] h-[100%] flex items-center justify-center">
+    <div class="rounded-lg shadow-white shadow-md w-[60%] bg-white">
+      <div class="rounded-lg w-[100%] h-[100%] bg-slate-200 p-5 mb-3 border-b-2 border-slate-500">
+        <h1 class="text-5xl font-bold text-center">Welcome to the Car Price Predictor</h1>
+      </div>
+
+      <div class="p-5">
+        <div class="text-center font-bold text-xl">
+          "Fuel Your Curiosity: Car Fortune-Telling, Driven by Puns!"
+
+          Buckle up, as we navigate the lanes of auto-astrology with puns hotter than exhaust pipes! 🚗
+        </div>
+        <hr class="my-5 bg-slate-800 h-[2px]" />
+        <div>
+          <form method="post" action="#" id="form">
+            <div class="my-5 flex flex-col gap-[.5rem] border-2 p-2 rounded-md bg-slate-200">
+              <label for="company" class=" font-semibold text-xl">Select the Company Name:</label>
+              <select id="company" name="company" class="border-2 border-black rounded-md p-1" required
+                onchange="loadCarModel(this.id, 'model')">
+                {% for company in companies %}
+                <option value="{{ company }}">{{ company }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="my-5 flex flex-col gap-[.5rem] border-2 p-2 rounded-md bg-slate-200">
+              <label for="model" class=" font-semibold text-xl">Select the Model Name:</label>
+              <select id="model" name="model" class="border-2 border-black rounded-md p-1" required>
+              </select>
+            </div>
+            <div class="my-5 flex flex-col gap-[.5rem] border-2 p-2 rounded-md bg-slate-200">
+              <label for="year" class=" font-semibold text-xl">Select the Year of Manufacturing:</label>
+              <select id="year" name="year" class="border-2 border-black rounded-md p-1" required>
+                {% for year in years %}
+                <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="my-5 flex flex-col gap-[.5rem] border-2 p-2 rounded-md bg-slate-200">
+              <label for="fuel_type" class=" font-semibold text-xl">Select the Fuel Type:</label>
+              <select id="fuel_type" name="fuel_type" class="border-2 border-black rounded-md p-1" required>
+                {% for fuel in fuel_types %}
+                <option value="{{ fuel }}">{{ fuel }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="my-5 flex flex-col gap-[.5rem] border-2 p-2 rounded-md bg-slate-200">
+              <label for="kms_driven" class=" font-semibold text-xl">Select the Kilometres driven:</label>
+              <input placeholder="Enter the Kilometres Driven" id="kms_driven" name="kms_driven"
+                class="border-2 border-black rounded-md p-1" required />
+            </div>
+
+            <button
+              class="w-[100%] bg-black text-white hover:bg-white hover:text-black duration-200 transition-all border-2 border-transparent hover:border-black p-2 rounded-md">
+              Predict Price
+            </button>
+          </form>
+        </div>
+        <div class="text-center font-bold text-3xl hidden" id="modal">
+          Predicting the Price.....
+        </div>
+
+        <div class="text-center font-bold text-3xl hidden my-5" id="modal_price">
+          Predicting the Price.....
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      const modal = document.getElementById("modal")
+      const modalPrice = document.getElementById("modal_price")
+
+      modal.classList.remove("hidden")
+      modalPrice.classList.add("hidden")
+      const response = await axios.post('/predict', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      console.log(response.data)
+      modal.classList.add("hidden")
+      modalPrice.classList.remove("hidden")
+      modalPrice.innerHTML = "The Predicted Price is: " + Number(response.data).toFixed(3) + " Lakhs"
+    }
+
+    const form = document.getElementById("form")
+    form.addEventListener('submit', handleSubmit)
+
+
+    function loadCarModel(currId, targetId) {
+      const currElement = document.getElementById(currId);
+      const targetElement = document.getElementById(targetId);
+
+
+
+      {% for company in companies %}
+      if (currElement.value == "{{ company }}") {
+        targetElement.innerHTML = "";
+        {% for model in car_models %}
+        {% if company in model %}
+        var newOption = document.createElement("option");
+        newOption.value = "{{ model }}";
+        newOption.innerHTML = "{{ model }}";
+        targetElement.options.add(newOption);
+        {% endif %}
+        {% endfor %}
+      }
+      {% endfor %}
+
+    }
+
+    loadCarModel("company", "model")
+  </script>
+</body>
+
+</html>
